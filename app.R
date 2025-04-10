@@ -6,54 +6,8 @@ library(stringr)
 library(dplyr)
 library(shinyWidgets)
 
-source('utils/create_intext_dropdown_selector.R')
-source('utils/selectParagraph.R')
 source('ui/dashboard_page_ui.R')
 source('ui/theming.R')
-
-# ============================================
-
-# Data exploration page sidebar
-# select_x_axis_ui = uiOutput('x_axis_ui',inline = T)
-
-# data_expl_sidebar = sidebar(
-#   h5("Sidebar"),
-#   selectParagraph(
-#     text = list("I want to explore how",
-#                 "inspections vary by",
-#                 "."),
-#     inputs = list(
-#       intextInput(inputId = 
-#                     'condition_1', 
-#                   label = 'All', 
-#                   selected = 'All', 
-#                   choices = c("All","Musselfouled","Highrisk"),
-#                   backgroundColour = 'green'),
-#       intextInput(inputId = 'x_axis_var',
-#                   label = 'Year', 
-#                   selected = 'Year', 
-#                   choices = c("Year","Station"),
-#                   textColour = 'red')
-#     )
-#   )
-# )
-
-# Data exploration page main content
-
-# data_expl_main_content = tagList(
-#   # textOutput('x_axis_chosen'),
-#   plotlyOutput('data_expl_plot')
-# )
-
-# data_exploration_page = nav_panel(
-#   title = 'Data Exploration',
-#   card(
-#     layout_sidebar(
-#       sidebar = data_expl_sidebar,
-#       data_expl_main_content
-#     )
-#   )
-# )
 
 ui <- page_navbar(
   # tags$head(tags$script(src="textInput_dropdown.js")),
@@ -61,7 +15,6 @@ ui <- page_navbar(
   title = h5("BC IMDP"),
   window_title = 'ZebraQuagga Mussel Dashboard',
   dashboard_page,
-  # data_exploration_page,
   selected = 'Dashboard'
 )
 
