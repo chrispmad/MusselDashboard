@@ -1,0 +1,25 @@
+.filt-acc{
+  background: blue !important;
+}
+
+.accordion-button {
+  background: ;
+}
+.accordion-button.collapsed {
+  background: var(--bs-primary) !important;
+}
+
+.summary_number {
+  font-weight: bold;
+}
+
+.sum-stat-card {
+  margin-top: -2.5rem;
+  margin-left: -1rem;
+  width: 25rem;
+}
+
+.shiny-input-container {
+  margin-top: 0.5rem;
+  margin-bottom: 0rem;
+}

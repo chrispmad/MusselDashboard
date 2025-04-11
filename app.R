@@ -7,14 +7,16 @@ library(dplyr)
 library(shinyWidgets)
 
 source('ui/dashboard_page_ui.R')
+source('ui/detailed_question_page_ui.R')
 source('ui/theming.R')
 
 ui <- page_navbar(
-  # tags$head(tags$script(src="textInput_dropdown.js")),
   theme = mussel_theme,
+  shiny::includeCSS("my_styles.css"),
   title = h5("BC IMDP"),
   window_title = 'ZebraQuagga Mussel Dashboard',
   dashboard_page,
+  # detailed_question_page,
   selected = 'Dashboard'
 )
 
@@ -28,19 +30,42 @@ server <- function(input, output, session) {
   
   source('server/startup_script.R')
   
+  min_date_limit = min(dat$Year, na.rm = T)
+  max_date_limit = max(dat$Year, na.rm = T)
+  
+  # Update year and month inputs
+  shinyWidgets::updatePickerInput(inputId = 'year_filt', choices = c(2015:max_date_limit), selected = c(2015:max_date_limit))
+  # shinyWidgets::updatePickerInput(inputId = 'month_filt', choices = c(:max_date_limit))
+  
+  # Pass full dataset to shiny server module(s)
+  # detailedQuestionServer('qt', dat)
+  
   # Apply data filters (year, month, station)
   dat_date_filtered = reactive({
     dat |>
-      filter(Year %in% input$year_filt) |>
-      mutate(Month = lubridate::month(Month, label=T)) |>
-      filter(Month %in% input$month_filt)
+      filter(Year %in% input$year_filt) #|>
+      # mutate(Month = lubridate::month(Month, label=T)) |>
+      # filter(Month %in% input$month_filt)
   })
   
   dat_station_filtered = reactive({
     req(length(input$stat_filt) > 0)
-    dat_date_filtered() |>
+    
+    d = dat_date_filtered() |>
       filter(Station %in% input$stat_filt)
+    
+    if(input$q_var %in% c("highrisk","musselfouled")){
+      d = d |> 
+        dplyr::filter(!!rlang::sym(stringr::str_to_title(input$q_var)))
+    }
+    
+    if(!is.null(input$q_wday)){
+      d = d |> 
+        dplyr::filter()
+    }
+    d
   })
+  
   
   stations_with_dat = reactive({
     req(dat_station_filtered())
@@ -48,8 +73,7 @@ server <- function(input, output, session) {
     stat_dat_summ = dat_station_filtered() |>
       dplyr::mutate(across(c("Musselfouled","Highrisk"), \(x) tidyr::replace_na(x, FALSE))) |>
       dplyr::filter(!is.na(Year)) |>
-      dplyr::group_by(Year, Station, Musselfouled, Highrisk) |>
-      dplyr::summarise(number_records = sum(n))
+      dplyr::count(Year, Station, Musselfouled, Highrisk, name = "number_records")
     
     stations |>
       dplyr::left_join(stat_dat_summ)

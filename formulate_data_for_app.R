@@ -17,7 +17,7 @@ print(paste0("The current range of inspection data is from ",oldest_date," to ",
 dat_summarized = dat_c |> 
   mutate(Year = as.numeric(Year)) |> 
   mutate(month = lubridate::month(TimeOfInspection),
-         day_of_week = lubridate::wday(TimeOfInspection)) |> 
+         day_of_week = lubridate::wday(TimeOfInspection, label = TRUE)) |> 
   count(Year,
         month,
         day_of_week,

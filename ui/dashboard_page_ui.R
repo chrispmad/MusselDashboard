@@ -22,27 +22,75 @@ month_picker_bit = pickerInput('month_filt',
                                )
 )
 
+station_picker_bit = uiOutput('stat_filt_ui')
+
+q_var_picker = selectInput('q_var',"Type of Inspection",choices = c("total_inspections","highrisk","musselfouled"), selected = 'total_inspections')
+q_period_picker = selectInput('q_per',"Time Period",choices = c("hour","day","week","month","year","all time"), selected = "all time")
+q_wday_picker = shinyWidgets::pickerInput('q_wday',"Days to Include",choices = c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"), selected = c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"), multiple = TRUE)
+q_op_picker = selectInput('q_op',"Summary Type",choices = c("average","total","max","min"), selected = "total")
+q_date_picker = shinyWidgets::airDatepickerInput(
+  inputId = "q_date",
+  label = "Specific Dates",
+  value = NA,
+  multiple = TRUE,
+  clearButton = TRUE, 
+  width = "100%"
+)
+
+
+filters_accordion = bslib::accordion(
+  class = "filt-acc",
+  accordion_panel(
+    "Filters",
+    year_picker_bit,
+    # month_picker_bit,
+    station_picker_bit,
+    q_var_picker,
+    q_wday_picker,
+    q_date_picker
+  ),
+  accordion_panel(
+    "Summary Options",
+    q_period_picker,
+    q_op_picker
+  ),
+  open = "Filters"
+)
+
 sum_stat_col = card(
-  card(
-    h6("Total Inspections: "),
-    div(class = 'summary_number', textOutput('tot_insp', inline = T)),
-    style = 'background:#88e3a0;font-weight:bold;'
+  layout_column_wrap(
+    width = 1/2,
+    card(
+      h6("Total Inspections: "),
+      div(class = 'summary_number', textOutput('tot_insp', inline = T)),
+      style = 'background:#88e3a0;'
+    ),
+    card(
+      h6("High-risk Inspections: "),
+      div(class = 'summary_number', textOutput('hr_insp', inline = T)),
+      style = 'background:#88a3e3;'
+    )
   ),
-  card(
-    h6("High-risk Inspections: "),
-    div(class = 'summary_number', textOutput('hr_insp', inline = T)),
-    style = 'background:#88a3e3;font-weight:bold'
+  layout_column_wrap(
+    width = 1/2,
+    card(
+      h6("Mussel-fouled Inspections: "),
+      div(class = 'summary_number', textOutput('mf_insp', inline = T)),
+      style = 'background:#e66572;'
+    ),
+    card(
+      h6("Quarantine Periods Issued: "),
+      div(class = 'summary_number', textOutput('quar_insp', inline = T)),
+      style = 'background:#d265e6;'
+    )
   ),
-  card(
-    h6("Mussel-fouled Inspections: "),
-    div(class = 'summary_number', textOutput('mf_insp', inline = T)),
-    style = 'background:#e66572;font-weight:bold'
-  ),
-  card(
-    h6("Quarantine Periods Issued: "),
-    div(class = 'summary_number', textOutput('quar_insp', inline = T)),
-    style = 'background:#d265e6;font-weight:bold'
-  )
+  class = 'sum-stat-card'
+)
+
+the_sidebar = sidebar(
+  width = '30%',
+  sum_stat_col,
+  filters_accordion
 )
 
 chart_col = card(
@@ -51,25 +99,15 @@ chart_col = card(
 
 dashboard_page = nav_panel(
   title = "Dashboard",
-  fluidRow(
-    # class = 'picker_inputs_section',
-    column(width = 4,
-           year_picker_bit
+  layout_sidebar(
+    layout_column_wrap(
+      width = 1/2,
+      card(
+        leafletOutput('my_map')
+      ),
+      chart_col,
+      style = 'margin-top:-2rem;'
     ),
-    column(width = 4,
-           month_picker_bit
-    ),
-    column(width = 4,
-           uiOutput('stat_filt_ui')
-    )
-  ),
-  layout_column_wrap(
-    width = 1/3,
-    card(
-      leafletOutput('my_map')
-    ),
-    sum_stat_col,
-    chart_col,
-    style = 'margin-top:-2rem;'
+    sidebar = the_sidebar
   )
 )
